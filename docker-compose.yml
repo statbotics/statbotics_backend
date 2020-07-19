@@ -1,0 +1,77 @@
+version: '3.7'
+
+services:
+  web:
+    container_name: django
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/usr/src/app/
+    ports:
+      - 8000:8000
+    environment:
+      - SECRET_KEY
+      - CLOUDSQL_HOST
+      - CLOUDSQL_USER
+      - CLOUDSQL_PASSWORD
+      - CLOUDSQL_DATABASE
+    depends_on:
+      - redis
+
+  celery:
+    container_name: celery
+    build: ./backend
+    command: celery worker --app=backend --loglevel=info --logfile=logs/celery.log
+    volumes:
+      - ./backend:/usr/src/app
+    environment:
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+      - SECRET_KEY
+      - CLOUDSQL_HOST
+      - CLOUDSQL_USER
+      - CLOUDSQL_PASSWORD
+      - CLOUDSQL_DATABASE
+    depends_on:
+      - web
+      - redis
+
+  celery-beat:
+    container_name: celery-beat
+    build: ./backend
+    command: celery --app=backend beat -l info
+    volumes:
+      - ./backend:/usr/src/app/
+    environment:
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+      - SECRET_KEY
+      - CLOUDSQL_HOST
+      - CLOUDSQL_USER
+      - CLOUDSQL_PASSWORD
+      - CLOUDSQL_DATABASE
+    depends_on:
+      - redis
+
+  redis:
+    container_name: redis
+    image: redis:6-alpine
+
+  dashboard:
+    container_name: flower
+    build: ./backend
+    command:  flower --app=backend --port=5555 --broker=redis://redis:6379/0
+    ports:
+      - 5555:5555
+    environment:
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+      - SECRET_KEY
+      - CLOUDSQL_HOST
+      - CLOUDSQL_USER
+      - CLOUDSQL_PASSWORD
+      - CLOUDSQL_DATABASE
+    depends_on:
+      - web
+      - redis
+      - celery

@@ -3,10 +3,10 @@ version: '3.7'
 services:
   web:
     container_name: django
-    build: ./backend
+    build: ./
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./backend:/usr/src/app/
+      - ./:/usr/src/app/
     ports:
       - 8000:8000
     environment:
@@ -20,10 +20,10 @@ services:
 
   celery:
     container_name: celery
-    build: ./backend
+    build: ./
     command: celery worker --app=backend --loglevel=info --logfile=logs/celery.log
     volumes:
-      - ./backend:/usr/src/app
+      - ./:/usr/src/app
     environment:
       - CELERY_BROKER=redis://redis:6379/0
       - CELERY_BACKEND=redis://redis:6379/0
@@ -38,10 +38,10 @@ services:
 
   celery-beat:
     container_name: celery-beat
-    build: ./backend
+    build: ./
     command: celery --app=backend beat -l info
     volumes:
-      - ./backend:/usr/src/app/
+      - ./:/usr/src/app/
     environment:
       - CELERY_BROKER=redis://redis:6379/0
       - CELERY_BACKEND=redis://redis:6379/0
@@ -59,7 +59,7 @@ services:
 
   dashboard:
     container_name: flower
-    build: ./backend
+    build: ./
     command:  flower --app=backend --port=5555 --broker=redis://redis:6379/0
     ports:
       - 5555:5555

@@ -1,5 +1,5 @@
-backend/rankings/migrations/*
-backend/static/*
+rankings/migrations/*
+static/*
 
 travis.json
 
@@ -8,4 +8,9 @@ __pycache__/*
 
 *.sql
 *.log
-backend/celerybeat.pid
+
+celerybeat.pid
+celerybeat-schedule
+
+Pipfile
+Pipfile.lock

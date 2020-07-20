@@ -7,3 +7,5 @@ __pycache__/*
 *.pyc
 
 *.sql
+*.log
+backend/celerybeat.pid

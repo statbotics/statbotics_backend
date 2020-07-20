@@ -12,15 +12,54 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
+from google.cloud import datastore
+
+
+def getEnvVar(client, name):
+    key = client.key("secret", name)
+    entry = client.get(key)
+    return entry["value"]
+
+
+def getEnvVars():
+    client = datastore.Client()
+    return [
+        getEnvVar(client, "CLOUDSQL_HOST"),
+        getEnvVar(client, "CLOUDSQL_DATABASE"),
+        getEnvVar(client, "CLOUDSQL_PASSWORD"),
+        getEnvVar(client, "CLOUDSQL_USER"),
+        getEnvVar(client, "SECRET_KEY")
+    ]
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+CLOUDSQL_HOST = os.environ.get("CLOUDSQL_HOST")
+CLOUDSQL_DATABASE = os.environ.get("CLOUDSQL_DATABASE")
+CLOUDSQL_PASSWORD = os.environ.get("CLOUDSQL_PASSWORD")
+CLOUDSQL_USER = os.environ.get("CLOUDSQL_USER")
+SECRET_KEY = os.environ.get("SECRET_KEY")
+
+if CLOUDSQL_HOST is None or CLOUDSQL_DATABASE is None or \
+        CLOUDSQL_PASSWORD is None or CLOUDSQL_USER is None or \
+        SECRET_KEY is None:
+    CLOUDSQL_HOST, CLOUDSQL_DATABASE, CLOUDSQL_PASSWORD, \
+        CLOUDSQL_USER, SECRET_KEY = getEnvVars()
+
+print("CONSTANTS")
+print(CLOUDSQL_HOST)
+print(CLOUDSQL_DATABASE)
+print(CLOUDSQL_PASSWORD)
+print(CLOUDSQL_USER)
+print(SECRET_KEY)
+print()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = SECRET_KEY  # placeholder
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -87,10 +126,10 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': os.environ.get("CLOUDSQL_HOST"),
-        'USER': os.environ.get("CLOUDSQL_USER"),
-        'PASSWORD': os.environ.get("CLOUDSQL_PASSWORD"),
-        'NAME': os.environ.get("CLOUDSQL_DATABASE"),
+        'HOST': CLOUDSQL_HOST,
+        'USER': CLOUDSQL_USER,
+        'PASSWORD': CLOUDSQL_PASSWORD,
+        'NAME': CLOUDSQL_DATABASE,
     }
 }
 # [END db_setup]

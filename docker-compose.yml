@@ -10,11 +10,11 @@ services:
     ports:
       - 8000:8000
     environment:
-      - SECRET_KEY
-      - CLOUDSQL_HOST
-      - CLOUDSQL_USER
-      - CLOUDSQL_PASSWORD
-      - CLOUDSQL_DATABASE
+      - SECRET_KEY=${SECRET_KEY}
+      - CLOUDSQL_HOST=${CLOUDSQL_HOST}
+      - CLOUDSQL_USER=${CLOUDSQL_USER}
+      - CLOUDSQL_PASSWORD=${CLOUDSQL_PASSWORD}
+      - CLOUDSQL_DATABASE=statbotics
     depends_on:
       - redis
 
@@ -27,11 +27,11 @@ services:
     environment:
       - CELERY_BROKER=redis://redis:6379/0
       - CELERY_BACKEND=redis://redis:6379/0
-      - SECRET_KEY
-      - CLOUDSQL_HOST
-      - CLOUDSQL_USER
-      - CLOUDSQL_PASSWORD
-      - CLOUDSQL_DATABASE
+      - SECRET_KEY=${SECRET_KEY}
+      - CLOUDSQL_HOST=${CLOUDSQL_HOST}
+      - CLOUDSQL_USER=${CLOUDSQL_USER}
+      - CLOUDSQL_PASSWORD=${CLOUDSQL_PASSWORD}
+      - CLOUDSQL_DATABASE=statbotics
     depends_on:
       - web
       - redis
@@ -45,11 +45,11 @@ services:
     environment:
       - CELERY_BROKER=redis://redis:6379/0
       - CELERY_BACKEND=redis://redis:6379/0
-      - SECRET_KEY
-      - CLOUDSQL_HOST
-      - CLOUDSQL_USER
-      - CLOUDSQL_PASSWORD
-      - CLOUDSQL_DATABASE
+      - SECRET_KEY=${SECRET_KEY}
+      - CLOUDSQL_HOST=${CLOUDSQL_HOST}
+      - CLOUDSQL_USER=${CLOUDSQL_USER}
+      - CLOUDSQL_PASSWORD=${CLOUDSQL_PASSWORD}
+      - CLOUDSQL_DATABASE=statbotics
     depends_on:
       - redis
 
@@ -66,11 +66,11 @@ services:
     environment:
       - CELERY_BROKER=redis://redis:6379/0
       - CELERY_BACKEND=redis://redis:6379/0
-      - SECRET_KEY
-      - CLOUDSQL_HOST
-      - CLOUDSQL_USER
-      - CLOUDSQL_PASSWORD
-      - CLOUDSQL_DATABASE
+      - SECRET_KEY=${SECRET_KEY}
+      - CLOUDSQL_HOST=${CLOUDSQL_HOST}
+      - CLOUDSQL_USER=${CLOUDSQL_USER}
+      - CLOUDSQL_PASSWORD=${CLOUDSQL_PASSWORD}
+      - CLOUDSQL_DATABASE=statbotics
     depends_on:
       - web
       - redis

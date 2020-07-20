@@ -1,36 +1,31 @@
 from django.contrib.auth.models import User
-
-from rest_framework import viewsets, permissions
-
-from rankings.serializers import (
-    YearSerializer,
-    TeamSerializer,
-    TeamYearSerializer,
-    EventSerializer,
-    TeamEventSerializer,
-    MatchSerializer,
-    TeamMatchSerializer,
-    UserSerializer
-)
+from rest_framework import permissions, viewsets
 
 from rankings.filters import (
-    YearFilterSet,
-    TeamFilterSet,
-    TeamYearFilterSet,
     EventFilterSet,
-    TeamEventFilterSet,
     MatchFilterSet,
+    TeamEventFilterSet,
+    TeamFilterSet,
     TeamMatchFilterSet,
+    TeamYearFilterSet,
+    YearFilterSet,
 )
-
-from rankings.models import (
-    Year as YearModel,
-    Team as TeamModel,
-    TeamYear as TeamYearModel,
-    Event as EventModel,
-    TeamEvent as TeamEventModel,
-    Match as MatchModel,
-    TeamMatch as TeamMatchModel,
+from rankings.models import Event as EventModel
+from rankings.models import Match as MatchModel
+from rankings.models import Team as TeamModel
+from rankings.models import TeamEvent as TeamEventModel
+from rankings.models import TeamMatch as TeamMatchModel
+from rankings.models import TeamYear as TeamYearModel
+from rankings.models import Year as YearModel
+from rankings.serializers import (
+    EventSerializer,
+    MatchSerializer,
+    TeamEventSerializer,
+    TeamMatchSerializer,
+    TeamSerializer,
+    TeamYearSerializer,
+    UserSerializer,
+    YearSerializer,
 )
 
 

@@ -12,48 +12,15 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
-from google.cloud import datastore
+from . import constants
 
-
-def getEnvVar(client, name):
-    key = client.key("secret", name)
-    entry = client.get(key)
-    return entry["value"]
-
-
-def getEnvVars():
-    client = datastore.Client()
-    return [
-        getEnvVar(client, "CLOUDSQL_HOST"),
-        getEnvVar(client, "CLOUDSQL_DATABASE"),
-        getEnvVar(client, "CLOUDSQL_PASSWORD"),
-        getEnvVar(client, "CLOUDSQL_USER"),
-        getEnvVar(client, "SECRET_KEY")
-    ]
+# Install PyMySQL as mysqlclient/MySQLdb to use Django's mysqlclient adapter
+# See https://docs.djangoproject.com/en/2.1/ref/databases/#mysql-db-api-drivers
+# for more information
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-CLOUDSQL_HOST = os.environ.get("CLOUDSQL_HOST")
-CLOUDSQL_DATABASE = os.environ.get("CLOUDSQL_DATABASE")
-CLOUDSQL_PASSWORD = os.environ.get("CLOUDSQL_PASSWORD")
-CLOUDSQL_USER = os.environ.get("CLOUDSQL_USER")
-SECRET_KEY = os.environ.get("SECRET_KEY")
-
-if CLOUDSQL_HOST is None or CLOUDSQL_DATABASE is None or \
-        CLOUDSQL_PASSWORD is None or CLOUDSQL_USER is None or \
-        SECRET_KEY is None:
-    CLOUDSQL_HOST, CLOUDSQL_DATABASE, CLOUDSQL_PASSWORD, \
-        CLOUDSQL_USER, SECRET_KEY = getEnvVars()
-
-print("CONSTANTS")
-print(CLOUDSQL_HOST)
-print(CLOUDSQL_DATABASE)
-print(CLOUDSQL_PASSWORD)
-print(CLOUDSQL_USER)
-print(SECRET_KEY)
-print()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -64,72 +31,90 @@ SECRET_KEY = SECRET_KEY  # placeholder
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django_filters',
-    'rest_framework',
-    'corsheaders',
-    'drf_yasg',
-    'rankings',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django_filters",
+    "rest_framework",
+    "corsheaders",
+    "drf_yasg",
+    "rankings",
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',  # comment to disable csrf
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",  # comment to disable csrf
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'backend.urls'
+ROOT_URLCONF = "backend.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'backend.wsgi.application'
+WSGI_APPLICATION = "backend.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-# Install PyMySQL as mysqlclient/MySQLdb to use Django's mysqlclient adapter
-# See https://docs.djangoproject.com/en/2.1/ref/databases/#mysql-db-api-drivers
-# for more information
-
 # [START db_setup]
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': CLOUDSQL_HOST,
-        'USER': CLOUDSQL_USER,
-        'PASSWORD': CLOUDSQL_PASSWORD,
-        'NAME': CLOUDSQL_DATABASE,
+if os.getenv("GAE_APPLICATION", None):
+    # Running on production App Engine, so connect to Google Cloud SQL using
+    # the unix socket at /cloudsql/<your-cloudsql-connection string>
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "HOST": "/cloudsql/" + constants.CLOUDSQL_CONNECTION,
+            "USER": constants.CLOUDSQL_USER,
+            "PASSWORD": constants.CLOUDSQL_PASSWORD,
+            "NAME": constants.CLOUDSQL_DATABASE,
+        }
+    }
+else:
+    # Running locally so connect to either a local MySQL instance or connect to
+    # Cloud SQL via the proxy. To start the proxy via command line:
+    #
+    #     $ cloud_sql_proxy -instances=[INSTANCE_CONNECTION_NAME]=tcp:3306
+    #
+    # See https://cloud.google.com/sql/docs/mysql-connect-proxy
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "HOST": "127.0.0.1",
+            "PORT": "3307",
+            "NAME": constants.CLOUDSQL_DATABASE,
+            "USER": constants.CLOUDSQL_USER,
+            "PASSWORD": constants.CLOUDSQL_PASSWORD,
+        }
     }
 }
 # [END db_setup]
@@ -140,30 +125,21 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.'
-                'UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation."
+        "UserAttributeSimilarityValidator",
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.'
-                'MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.'
-                'CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.'
-                'NumericPasswordValidator',
-    },
+    {"NAME": "django.contrib.auth.password_validation." "MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation." "CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation." "NumericPasswordValidator"},
 ]
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -179,22 +155,20 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',
-    'https://statbotics.io',
-    'https://www.statbotics.io',
+    "http://localhost:3000",
+    "https://statbotics.io",
+    "https://www.statbotics.io",
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS':
-        ['django_filters.rest_framework.DjangoFilterBackend'],
-    'DEFAULT_PAGINATION_CLASS':
-        'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 20,
-    'DEFAULT_THROTTLE_RATES': {'anon': '100/day', 'user': '1000/day'},
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 20,
+    "DEFAULT_THROTTLE_RATES": {"anon": "100/day", "user": "1000/day"},
 }
 
 SWAGGER_SETTINGS = {
-    'DEFAULT_MODEL_RENDERING': 'example',
+    "DEFAULT_MODEL_RENDERING": "example",
 }
 
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
